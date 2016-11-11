@@ -1092,6 +1092,7 @@ def list_delayed_task(request):
         else:
 		return render(request,'delayed_task.html',{'result':result,'searchTaskForm':searchTaskForm,'accepting_tasks_count':accepting_tasks_count,'handling_tasks_count':handling_tasks_count})
 
+@check_login()
 def record_talk(request):
 	if request.method == 'POST':
 		task_id=request.POST['task_id']
