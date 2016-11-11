@@ -600,7 +600,6 @@ def list_all_task(request):
 	else:
         	return render(request,'all_task.html',{'all_task_list':all_task_list,'accepting_tasks_count':accepting_tasks_count,'handling_tasks_count':handling_tasks_count,'searchTaskForm':searchTaskForm})
 
-@check_login()
 def search_tasks(request,search_time,p_id=None):
 	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
         handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
