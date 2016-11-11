@@ -1,0 +1,95 @@
+elk:
+数据存储在索引上，基本单位是文档（类型），把索引分片，有备份分片（副本），多节点（集群），有主节点，用于集群的管理作用，每一个分片都有一个备份分片。
+默认主播
+配置文件（elasticsearch.yml）注意参数和值之间的空格需要加上：
+cluster.name:不能重复
+node.master:是否可以选举为master
+node.data:是否可以存储数据
+以上两项可以只做master，也可以只存储数据，具体由你按照实际情况来定
+index.number_of_shards: 3索引分片的个数
+index.number_of_replicas: 1备份分片的个数
+path.data:可以使用多个路径，用逗号分隔
+path.work：用于存放临时文件
+path.plugins:用于存放插件的目录
+bootstrap.mlockall:true,用于锁住内存，jvm使用swap效率会比较低
+9200：对外
+9300：节点之间交互
+启动：/opt/app/elasticsearch/bin/elasticsearch -d（可能root权限启动不起来，同时注意权限问题）
+测试一下：curl http://127.0.0.1:9200
+使用jps命令查看java进程
+github上提供了以服务方式启动的形式
+yum install git -y
+git clone https://github.com/elasticsearch/elasticsearch-servicewrapper.git
+mv elasticsearch-servicewrapper/service/ /opt/app/elasticsearch/bin/
+/opt/app/elasticsearch/bin/service/elasticsearch install  //开启自启动
+生产环境最好不要设置服务的形式启动
+可通过/opt/app/elasticsearch/logs/下面的service.log查看服务启动情况
+curl -X GET http://127.0.0.1:9200/_count?pretty -d '
+> {
+>                        
+>      "query": {
+>           "match_all":{}
+>       }
+> }'
+安装插件：marve
+/opt/app/elasticsearch/bin/plugin install license
+/opt/app/elasticsearch/bin/plugin install marvel-agent   //marvel监控的插件，收费版的，可以选择试用
+安装head：/opt/app/elasticsearch/bin/plugin install mobz/elasticsearch-head
+安装第二个node节点，把主的配置文件拷贝过去，改下node-name即可
+
+集群健康值：绿色：集群所有节点都是健康的
+            黄色：主分片没有丢失，备份分片有丢失
+            红色：有主分片丢失
+	    分片丢失，框会变红，粗框的是主，没有框的是从
+或者通过curl -XGET http://192.168.47.135:9200/_cluster/health?pretty来查看集群的健康的情况，输出如下：
+{
+  "cluster_name" : "elasticsearch",
+  "status" : "green",
+  "timed_out" : false,
+  "number_of_nodes" : 2,
+  "number_of_data_nodes" : 2,
+  "active_primary_shards" : 11,
+  "active_shards" : 22,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 0,
+  "delayed_unassigned_shards" : 0,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0
+}
+可以用zabbix来监控，通过以上的curl的输出
+生产环境下max_file_descriptor和sysctl -w vm.max_map_count=262144需要设置
+可动态的修改配置
+动态升级
+做快照，压缩的，要经常试一下
+master检测失效的子节点，用ping，多播（可改单播）发现，自动选举主节点
+集群子节点down掉或者备份分片丢失的话，master会在健康的节点上重建分片
+<ES权威指南>中文版
+logstash
+建议yum安装
+/opt/app/logstash/bin/logstash -e "input { stdin{} } output { elasticsearch { host => '192.168.47.135' protocol=>'http' } }"
+输入然后在elasticsearch上展示
+input和output插件
+file(input):相当于tailf，每次读取一段，sincedb_path相当于记录读的位置,默认1s检查读取的文件
+file(output):gzip默认不压缩
+配置文件:logstash.conf(先压缩保存一份到本地opt目录下，然后在elasticsearch展示，需要不断往里面写东西才会看到，默认从文件最后面读)
+启动:nohup /opt/app/logstash/bin/logstash agent -f /opt/app/logstash/logstash.conf &
+input {
+        file {
+                path => "/var/log/messages"
+        }
+}
+
+output {
+        file {
+                path => "/opt/%{+YYYY-MM-dd}.messages.gz"
+                gzip => true
+        }
+
+        elasticsearch {
+                host => '192.168.47.135'
+                protocol => 'http'
+                index => 'system-message-%{+YYYY.MM.dd}'
+
+        }
+}

@@ -1,0 +1,220 @@
+{% extends "index.html" %}
+{% block header_css %}
+        <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
+        <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+        <style>
+		a:hover {
+			cursor:pointer;
+		}
+		div#modal-box {
+			width:200px;
+			height:100px;
+			border:1px solid #ccc;
+			overflow:auto;
+			text-indent:20px;
+		}
+		div#modal-box p {
+			margin-top:5px;
+		}
+        </style>
+{% endblock %}
+{% block content %}
+<div class="col-sm-offset-2 col-sm-8 col-sm-offset-2" style="margin-top:5px">
+	  <!--
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfsfdd
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+  	  <div class="modal-dialog modal-sm">
+            <div class="modal-content" id='modal-box'>
+	       {% if template_obj %}
+			{% for item in template_obj %}
+				<p>{{item.template_name}} <a onclick='delete_template({{item.id}})' style='color:red'>X</a><p>
+			{% endfor %}
+		{% endif %}
+            </div>
+          </div>
+        </div>
+	<h3>{{title}}</h3>
+	<div class="table-responsive">
+		<table class="table table-striped" id='tb'>
+                 <tbody>
+		     <form action='/task/create_task/' method='post' enctype="multipart/form-data" id='form'>{% csrf_token %}
+			<tr><td><span style='color:red'>*</span>项目模块</td><td>{{CreateTaskForm.project_model}}</td></tr>
+        	     	<tr><td><span style='color:red'>*</span>项目分类</td><td>{{CreateTaskForm.task_name}}</td></tr>
+        	     	<tr><td><span style='color:red'>*</span>任务标题</td><td>{{CreateTaskForm.task_title}}</td></tr>
+			<tr><td>关联模板</td><td onchange='select_template(this)'>{{html|safe}} <a data-toggle="modal" data-target=".bs-example-modal-sm">管理模板</a></td></tr>
+        	     	<tr><td>关联任务</td><td>{{CreateTaskForm.related_task}}</td></tr>
+        	     	<tr><td>任务类型</td><td>{{CreateTaskForm.task_type}}</td></tr>
+        	     	<tr><td>任务优先级</td><td>{{CreateTaskForm.task_priority}}</td></tr>
+        	     	<tr><td>任务指派</td><td>{{CreateTaskForm.task_assign}}</td></tr>
+        	     	<tr><td>任务抄送</td><td>{{CreateTaskForm.task_cc}}</td></tr>
+        	     	<tr><td>是否需要测试</td><td>{{CreateTaskForm.is_test}}</td></tr>
+        	     	<tr><td>计划时间</td><td>{{CreateTaskForm.start_time}} 至 {{CreateTaskForm.end_time}}</td></tr>
+        	     	<tr><td>任务目标</td><td>{{CreateTaskForm.task_target}}</td></tr>
+        	     	<tr><td><span style='color:red'>*</span>项目描述</td><td id='task_des'>{{CreateTaskForm.task_description}}</td></tr>
+        	     	<tr><td>任务附件</td><td>{{CreateTaskForm.task_attachment}}</td></tr>
+			<tr><td><input type='submit' value='提交' class="btn btn-primary" /></td><td><input type='button' id='template' value='创建模板' class="btn btn-primary" /></td></tr>
+		     </form>
+                 </tbody>
+               </table>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+  <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-1.7.1.min.js"></script>
+  <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-1.8.17.custom.min.js"></script>
+  <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-addon.js"></script>
+  <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-zh-CN.js"></script>
+  <script type="text/javascript" src="/static/plugins/ckeditor/ckeditor.js"></script>
+  <script type="text/javascript" src="/static/plugins/jqueryform/jquery.form.min.js"></script>
+  <script>
+	$("#id_start_time").addClass('ui_timepicker');
+        $("#id_end_time").addClass('ui_timepicker');
+        $(".ui_timepicker").datetimepicker({
+        	showOn: "button",
+                buttonImage: "/static/plugins/datetimepicker/css/images/icon_calendar.gif",
+                buttonImageOnly: true,
+                showSecond: true,
+                timeFormat: 'hh:mm:ss',
+                stepHour: 1,
+                stepMinute: 1,
+                stepSecond: 1
+        });
+	editor=CKEDITOR.replace('id_task_description');
+        CKEDITOR.editorConfig = function( config ) {
+        	config.skin = 'v2';
+                config.uiColor = '#FFF';
+                config.height = 500;
+                config.toolbarCanCollapse = true;
+        };
+	if('{{ edit_task_obj }}'){
+		$('#tb').find('td').eq(1).find('option').each(function(){
+                	if($(this).text()=='{{ edit_task_obj.project_model }}'){
+                		$(this).attr('selected','selected');
+                	}
+                });
+                $('#tb').find('td').eq(3).find('option').each(function(){
+                	if($(this).text()=='{{ edit_task_obj.task_name }}'){
+                        	$(this).attr('selected','selected');
+                        }
+                });
+                $('#tb').find('td').eq(5).find('input').val('{{ edit_task_obj.task_title }}');
+                $('#tb').find('td').eq(9).find('input').val('{{ edit_task_obj.related_task }}');
+                $('#tb').find('td').eq(11).find('option').each(function(){
+                	if($(this).text()=='{{ edit_task_obj.task_type }}'){
+                        	$(this).attr('selected','selected');
+                        }
+                });
+                $('#tb').find('td').eq(15).find('input').val('{{ edit_task_obj.task_assign }}');
+                $('#tb').find('td').eq(17).find('input').val('{{ edit_task_obj.task_cc }}');
+                $('#tb').find('td').eq(19).find('option').each(function(){
+                	if($(this).val()=='{{ edit_task_obj.is_test }}'){
+                        	$(this).attr('selected','selected');
+                        }
+                });
+                $('#tb').find('td').eq(23).find('textarea').val('{{ edit_task_obj.task_target }}');
+		editor.setData('{{ edit_task_obj.task_description | safe }}');
+	}
+
+	function select_template(obj){
+		t_id=$(obj).find(':selected').val();
+		$.ajax({
+			type:'get',
+			url:'/task/create_template/',
+			data:{'t_id':t_id},	
+			success:function(data){
+					var data=$.parseJSON(data);
+					$('#tb').find('td').eq(1).find('option').each(function(){
+						if($(this).text()==data['project_model']){
+							$(this).attr('selected','selected');
+						}
+					})
+					$('#tb').find('td').eq(3).find('option').each(function(){
+                                                if($(this).text()==data['task_name']){
+                                                        $(this).attr('selected','selected');
+                                                }
+                                        })
+					$('#tb').find('td').eq(5).find('input').val(data['task_title']);
+					$('#tb').find('td').eq(9).find('input').val(data['related_task']);
+					$('#tb').find('td').eq(11).find('option').each(function(){
+                                                if($(this).text()==data['task_type']){
+                                                        $(this).attr('selected','selected');
+                                                }
+                                        })
+					$('#tb').find('td').eq(15).find('input').val(data['task_assign'])
+					$('#tb').find('td').eq(17).find('input').val(data['task_cc'])
+					$('#tb').find('td').eq(19).find('option').each(function(){
+                                                if($(this).val()==data['is_test']){
+                                                        $(this).attr('selected','selected');
+                                                }
+                                        })
+					$('#tb').find('td').eq(23).find('textarea').val(data['task_target'])
+					editor.setData(data['task_description']);
+				}
+		})
+	}	
+	function delete_template(id){
+		$.ajax({
+			type:'get',
+			url:'/task/create_template/',
+			data:{'id':id},
+			success:function(data){
+					alert(data);
+					window.location.href=window.location.href
+				},
+			error:function(data){
+					alert(data);
+				},
+		})
+
+	}
+	$('#template').click(function(){
+		var task_des=editor.document.getBody().getText();
+		var options = {
+			type:'POST',
+			url:'/task/create_template/',
+			data:{'task_description':task_des},
+			resetForm:true,
+        		success: function (data) {
+            			alert(data);
+        		}
+    		};
+		$('form').ajaxSubmit(options);
+	})
+
+	if('{{message}}'){
+		alert('{{message}}');
+	}
+	$(function(){
+		var url=window.location.href;
+                if (url.indexOf('?message')>0){
+			position=url.indexOf('?');
+                        url=url.substring(0,position);
+                        window.location.href=url;
+		}
+	})
+  </script>
+{% endblock %}

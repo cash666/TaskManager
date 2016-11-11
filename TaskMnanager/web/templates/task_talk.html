@@ -1,0 +1,44 @@
+<head>
+  <style>
+	#talk_container {
+		float:right;
+		margin-right:10px;
+		margin-top:30px;
+		width:200px;
+	}
+	#talk_container h4 {
+		text-align:center;
+		background:blue;
+		margin-bottom:1px;
+	}
+	#talk_container input {
+		margin-top:3px;
+		margin-left:72px;
+	}
+	#talk_show p {
+		margin:0;
+		padding:0;
+	}
+  </style>
+</head>
+<body>
+  <div id='talk_container'>
+    <h4>任务交流区</h4>
+    <div id='talk_show'></div>
+    <textarea cols='25' rows='5'></textarea>
+    <input type='button' onclick='show_talk(this)' class='btn btn-primary' value='提交' />
+  </div>
+  <script>
+	function show_talk(obj){
+		var talk_content=$(obj).parent().find('textarea').val();
+		$.ajax({
+			type:'post',
+			url:'/task/record_talk/',
+			data:{'task_id':"{{task_id}}",'talk_content':talk_content,'csrfmiddlewaretoken':'{{ csrf_token }}'},
+			success:function(data){
+					$('#talk_show').html(data);
+				},
+		})
+	}
+  </script>
+</body>

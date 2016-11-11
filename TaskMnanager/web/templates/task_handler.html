@@ -1,0 +1,25 @@
+<div style='margin-top:50px'>
+  <form action='/task/handle_task/' method='post' enctype='multipart/form-data'>{% csrf_token %}
+    <table class="table table-hover">
+       <tbody>
+	<tr><td style='font-weight:bold'>任务处理:</td></tr>
+        <tr><td onchange="task_switch(this)">操作: {{HandleTaskForm.task_handle}}</td></tr>
+       </tbody>
+
+       <tbody id='task_accept' style='display:block'>
+  	<tr><td>工期: {{ HandleTaskForm.start_time }} 至 {{ HandleTaskForm.end_time }}</td></tr>
+      </tbody>
+
+      <tbody id='task_transfer' style='display:none'>
+        <tr><td>任务指派: {{HandleTaskForm.task_transfer}}</td></tr>
+        <tr><td>任务抄送: {{HandleTaskForm.task_cc2}}</td></tr>
+        <tr><td>{{ HandleTaskForm.task_attachment }}</td></tr>
+      </tbody>
+
+      <tbody>
+	<tr><td>备注: {{ HandleTaskForm.task_remark }}</td></tr>
+	<tr><td>{{ HandleTaskForm.task_id }}<input type='submit' value='提交' class='btn btn-primary' /></td></tr>
+      </tbody>
+    </table>
+  </form>
+</div>

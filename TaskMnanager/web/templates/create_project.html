@@ -1,0 +1,100 @@
+{% extends "index.html" %}
+{% block header_css %}
+        <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
+        <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+        <style>
+        </style>
+{% endblock %}
+{% block content %}
+<div class="col-sm-offset-2 col-sm-8 col-sm-offset-2" style="margin-top:5px">
+	  <!--
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfsfdd
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              erewere
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sdsfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              sfsdfds
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+   	</div>
+	--!>
+	<h3>新建项目</h3>
+	<div class="table-responsive">
+		<table class="table table-striped">
+                 <tbody>
+		     <form action='/task/create_project/' method='post' enctype="multipart/form-data">{% csrf_token %}
+			<tr><td><span style='color:red'>*</span>项目分类</td><td>{{CreateProjectForm.project_model}}</td></tr>
+        	     	<tr><td><span style='color:red'>*</span>项目名称</td><td>{{CreateProjectForm.project_name}}</td></tr>
+        	     	<tr><td><span style='color:red'>*</span>项目类型</td><td>{{CreateProjectForm.project_type}}</td></tr>
+        	     	<tr><td>项目优先级</td><td>{{CreateProjectForm.project_priority}}</td></tr>
+        	     	<tr><td>计划时间</td><td>{{CreateProjectForm.start_time}} 至 {{CreateProjectForm.end_time}}</td></tr>
+        	     	<tr><td>产品负责人</td><td>{{CreateProjectForm.product_leader}}</td></tr>
+        	     	<tr><td>设计负责人</td><td>{{CreateProjectForm.design_leader}}</td></tr>
+        	     	<tr><td>前端负责人</td><td>{{CreateProjectForm.frontend_leader}}</td></tr>
+        	     	<tr><td>开发负责人</td><td>{{CreateProjectForm.backend_leader}}</td></tr>
+        	     	<tr><td>测试负责人</td><td>{{CreateProjectForm.test_leader}}</td></tr>
+        	     	<tr><td>项目参与人</td><td>{{CreateProjectForm.project_participants}}</td></tr>
+        	     	<tr><td>默认抄送人员</td><td>{{CreateProjectForm.default_cc}}</td></tr>
+        	     	<tr><td><span style='color:red'>*</span>项目描述</td><td>{{CreateProjectForm.project_description}}</td></tr>
+        	     	<tr><td>任务附件</td><td>{{CreateProjectForm.project_attachment}}</td></tr>
+			<tr><td><input type='submit' value='提交' class="btn btn-primary" /></td><td><input type='reset' value='重置' class="btn btn-primary" /></td></tr>
+		     </form>
+                 </tbody>
+               </table>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+  <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-1.7.1.min.js"></script>
+  <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-1.8.17.custom.min.js"></script>
+  <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-addon.js"></script>
+  <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-zh-CN.js"></script>
+  <script type="text/javascript" src="/static/plugins/ckeditor/ckeditor.js"></script>
+  <script>
+	if('{{message}}'){
+		alert('{{message}}');
+	}
+	$(function(){
+		var url=window.location.href;
+                if (url.indexOf('?message')>0){
+			position=url.indexOf('?');
+                        url=url.substring(0,position);
+                        window.location.href=url;
+		}
+	})
+	$("#id_start_time").addClass('ui_timepicker');
+	$("#id_end_time").addClass('ui_timepicker');
+        $(".ui_timepicker").datetimepicker({
+		showOn: "button",
+                buttonImage: "/static/plugins/datetimepicker/css/images/icon_calendar.gif",
+                buttonImageOnly: true,
+                showSecond: true,
+                timeFormat: 'hh:mm:ss',
+                stepHour: 1,
+                stepMinute: 1,
+                stepSecond: 1
+	})
+	CKEDITOR.replace('id_project_description');
+        CKEDITOR.editorConfig = function( config ) {
+            config.skin = 'v2';
+            config.uiColor = '#FFF';
+            config.height = 500;
+            config.toolbarCanCollapse = true;
+        };
+  </script>
+{% endblock %}

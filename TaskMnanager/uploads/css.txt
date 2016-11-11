@@ -1,0 +1,17 @@
+#a .b .c,#a .b .d,#a .b .e ======>   可以写成 #a .b,.c,.d,.e
+
+属性选择器：
+input[type='text'][name='username'] {
+	/* border:3px solid blue; */   #注释
+	background:red;
+}
+
+position:fixed  固定，relative,absolute
+
+clear:both  //消除浮动
+
+overflow:auto/hidden  //滚动条
+opacity:0.4;
+filter:alpha(opacity=0.4)
+
+z-index 越大越靠上

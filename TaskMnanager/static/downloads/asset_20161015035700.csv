@@ -1,0 +1,2 @@
+id,hostname,InnerIp,OuterIp,manufacturer,productname,sn,cpu_model,cpu_nums,cpu_cores,mem,disk,os
+3,localhost.localdomain,192.168.47.154,192.168.47.154,"VMware, Inc.",VMware Virtual Platform,VMware-56 4d e1 b5 f1 b6 d1 99-df 78 c4 8e b5 e7 0a ac,Intel(R) Core(TM) i5-4200U CPU @ 1.60GHz,0,1,498160 kB,20G,Linux

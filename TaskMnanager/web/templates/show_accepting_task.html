@@ -1,0 +1,74 @@
+{% extends "index.html" %}
+{% load formtags %}
+{% block header_css %}
+	<link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
+        <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+	<style>
+		table a:hover {
+                        cursor:pointer;
+                        color:red;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-8 col-md-offset-2 main">
+	<div overflow='hidden'>
+		<h4 class="glyphicon glyphicon-tasks"><span style='font-weight:bold'>{{task_title}}</span></h4>
+		<table class="table table-hover">
+                 <tbody>
+      		   {% for item in show_accepting_task_obj %}
+        	     <tr><td>任务状态:{{ item.task_status }}</td><td>优先级:{{ task_priority }}</td></tr>
+        	     <tr><td>任务类型:{{ task_type }}</td><td>发起人:{{ task_promoter }}</td></tr>
+        	     <tr><td>任务工期:{{ start_time|date:"Y-m-d H:i:s" }} 至 {{ end_time|date:"Y-m-d H:i:s" }}共{{hour}}小时</td><td>指派给:{{ task_assign }}</td></tr>
+        	     <tr><td colspan='2'>抄送人员:{{ task_cc }}</td></tr>
+        	     <tr><td colspan='2'>任务附件:{% if task_attachment %} {% split_str task_attachment.name %} <a href='/task/download/?t_id={{item.task_id}}'>下载</a> {% endif %}</td></tr>
+        	     <tr><td colspan='2' style='font-weight:bold'>任务详情:</td></tr>
+		     <tr><td style='border:1px solid #ccc' colspan='2'>{{task_description|safe}}</td></tr>
+		     <tr><td colspan='2' style='font-weight:bold'>任务历史:</td></tr>
+		     {% ifequal create_task_history_obj None %}
+		     {% else %}
+		     	<tr><td style='border:1px solid #ccc' colspan='2'>{{ create_task_history_obj.task_history }}</td></tr>
+		     {% endifequal %}
+                   {% endfor %}
+                 </tbody>
+               </table>
+	</div>
+	{% include 'task_handler.html' %}
+</div>
+{% include 'task_talk.html' %}
+{% endblock %}
+{% block bottom_js %}
+	<script type="text/javascript" src="/static/js/common.js"></script>
+	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-1.7.1.min.js"></script>
+  	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-1.8.17.custom.min.js"></script>
+  	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-addon.js"></script>
+  	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-zh-CN.js"></script>
+	<script>
+	  $('#talk_show').html("{{html}}");
+	  $('#id_task_id').val('{{task_id}}');
+	  $("#id_start_time").addClass('ui_timepicker');
+          $("#id_end_time").addClass('ui_timepicker');
+          $(".ui_timepicker").datetimepicker({
+                showOn: "button",
+                buttonImage: "/static/plugins/datetimepicker/css/images/icon_calendar.gif",
+                buttonImageOnly: true,
+                showSecond: true,
+                timeFormat: 'hh:mm:ss',
+                stepHour: 1,
+                stepMinute: 1,
+                stepSecond: 1
+          })
+
+	  $(function(){
+                var url=window.location.href;
+                if (url.indexOf('&message')>0){
+			len=url.length;
+                        position=url.indexOf('&message');
+			data=url.substring(position+9,len+1);
+			alert(decodeURIComponent(data));
+                        url=url.substring(0,position);
+                        window.location.href=url;
+                }
+        })
+	</script>
+{% endblock %}

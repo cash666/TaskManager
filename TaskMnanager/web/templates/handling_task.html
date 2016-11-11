@@ -1,0 +1,53 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<style>
+		table a:hover {
+                        cursor:pointer;
+                        color:red;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped" border='1'>
+		  <thead>
+      		    <tr>
+		      <th>任务序号</th>
+		      <th>任务编号</th>
+                      <th>标题</th>
+                      <th>创建人</th>
+                      <th>指派人</th>
+                      <th>创建时间</th>
+                      <th>到期时间</th>
+                      <th>状态</th>
+                      <th>优先级</th>
+                      <th>类型</th>
+                      <th>操作</th>
+      		    </tr>
+                 </thead>
+                 <tbody>
+      		     {% for item in handling_task_obj %}
+        	       <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{task_title}}</td><td>{{task_promoter}}</td><td>{{task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{end_time|date:"Y-m-d H:i:s"}}</td><td>{{item.task_status}}</td><td>{{task_priority}}</td><td>{{task_type}}</td><td><a href='/task/show_handling_task?t_id={{item.task_id}}'>查看</a></td></tr>
+                     {% endfor %}
+                 </tbody>
+               </table>
+	       <div style="float:right">{{pager_str}}</div>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script>
+		if("{{message}}"){
+			alert("{{message}}");
+		}
+		$(function(){
+                        var url=window.location.href;
+                        if (url.indexOf('?message')>0){
+                                position=url.indexOf('?');
+                                url=url.substring(0,position);
+                                window.location.href=url;
+                        }
+                })
+	</script>
+{% endblock %}

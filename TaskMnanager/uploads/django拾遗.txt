@@ -1,0 +1,318 @@
+外键:
+如果外键引用的类在后面的话，那么在引用里面需要加上单引号把引用的类引起来
+
+class Book(models.Model):
+	title=models.CharField(max_length=20)
+	author=models.ForeignKey('Author',related_name='books')
+	
+class Author(models.Model):
+	name=models.CharField(max_length=20)
+		
+related_name用法,适用于一个表里面有多个ForeignKey时:
+反向访问:author.book_set 加了related_name,就可以这样访问了,author.books
+
+QuerySet distinct去除所有重读元素
+Person.objects.values('first')
+--->[('first':u'John'),('first':u'Jane')]
+Person.objects.values_list('first')
+--->[(u'John'),(u'Jane')]
+
+select_related在null=True时不会去查找关系
+可以使用depth参数来控制在关系链上走多远,并忽略其他在Person或Address定义的ForeignKey
+Person.objects.all().select_related('address',depth=1)
+
+Q: |或,&且
+
+extra方法:
+select   修改select语句
+where    提供额外的where子句
+tables   提供额外的表
+params   安全的替换动态参数
+
+user_obj=Person.objects.all().extra(select={'is_adult':'age>18'})
+相当于select age>18 as is_adult from Person;
+
+for user in user_obj:
+	if user.is_adult:
+		xxxx
+
+matches=Person.objects.all().extra(select={'username':'first||last'}),where=["first||last like '%smith%'"])	
+相当于select first||last as username from Person where first||last like '%smith%';
+
+joined=Book.objects.all().extra(tables=['person'],where=['last=author_last'])
+相当于select * from book,person where last=author_last;
+
+使用params正确的转义或者插入动态参数，来替换where字符串里的%字符串占位符
+from somewhere import unknow_input
+matches=Person.objects.all().extra(where=[first='%s'],parmas=[unknow_input()])
+
+django自定义SQL查询:
+from django.db import connection
+
+c=connection.cursor()
+c.execute('select * from web_idc limit 10')
+rows=c.fetchall()
+for row in rows:
+		print "%s %s" % (row[0],row[1])
+	
+使用多个patterns对象,使用+=连接
+urlpatterns=patterns('myproject.blog.views',
+	url(r'^$','index'),
+	url(r'^blog/news/$','news_post'),
+)
+urlpatterns+=patterns('myproject.guessbook.views',
+	url(r'^guessbook/add/$','news_entry'),
+)
+urlpatterns+=patterns('myproject.catalog.views',
+	url(r'^catalog/$','index'),
+)
+
+urlpatterns=patterns('',
+	url(r'^blog/',include('myproject.blog.urls')),
+)
+urlpatterns+=patterns('',
+	url(r'^catelog/',include('myproject.catalog.urls')),
+)				
+
+HttpResponse
+response=HttpResponse()
+response.write('<html>')
+response.write('This is a test page')
+response.write('</html>')
+
+URLconf最后可以加一个可选的字典参数
+urlpatterns=patterns('',
+					url(r'^blog/(?P<year>\d{4})/$','index',{'show_private':True},	
+					)
+
+def index(request,year,show_private):
+	return HttpResponse()
+
+from django.http import Http404
+from django.shortcuts import render,get_object_or_404,get_list_or_404
+#获取一个对象或者列表，如果查找失败就抛出Http404
+from web.models import Person
+from 
+
+def person_detail(request,id):
+		try:
+			person=Person.objects.get(id=id)
+		except Person.DoesNotExist:
+			raise Http404('No person matches the given query')
+		return render(request,'detail.html',{'person':person})
+			
+或
+def person_detail(request,id):
+	person=get_object_or_404(Person,id=id)
+	return render(request,'detail.html',{'person':person})
+	
+	queryset = Book.objects.filter(title__startswith='M')
+	get_object_or_404(queryset, pk=1)
+	或
+	get_object_or_404(Book, title__startswith='M', pk=1)
+	
+内置标签:
+{% ifequal object_list|length 10 %}
+{% if object_list|length_is:10 %}
+{{ forloop.first }}
+{{ forloop.last }}
+{{ forloop.counter0 }}  #从0开始
+
+ModelForm
+from django import forms
+from web.models import person
+
+class PersonForm(forms.ModelForm):
+	class Meta:
+		model=person   #model类
+		
+相当于是把person models里面定义的全部定义到PersonForm里
+
+ModelForm的Meta嵌套允许你定义两个可选的属性,fields和exclude
+这两个是要包含的或者排除的变量名的列表或者元组，每次只能用一个
+
+from django import forms
+from web.models import person
+
+class PersonForm(forms.ModelForm):
+	class Meta:
+		model=person   #model类
+		exclude=['middle',]
+		或
+		fields=['last','first']
+		
+重写forms层里的子类
+class PersonForm(forms.ModelForm):
+	first=forms.CharField(max_length=20)   #修改最大长度或CharField改为TextField
+	class Meta:
+		model=person   #model类
+		exclude=['middle',]
+		或
+		fields=['last','first']
+继承表单
+class PersonForm(forms.Form):
+	first=forms.CharField(max_length=100)
+	last=forms.CharField(max_length=100)
+	middle=forms.CharField(max_length=100)
+	
+class AgePersonForm(PersonForm):   #继承PersonForm，下面的form字段都继承
+	age=models.IntegerField()
+	
+多重继承:
+class PersonForm(forms.Form):
+	first=forms.CharField(max_length=100)
+	last=forms.CharField(max_length=100)
+	middle=forms.CharField(max_length=100)
+	
+class BookForm(forms.Form):
+	location=forms.CharField()
+	quantity=forms.IntegerField()
+	
+class PulisherForm(PersonForm,BookForm):  #继承PersonForm和BookForm
+	pass
+	
+class PersonForm(forms.Form):
+	first=forms.CharField(max_length=100)
+	last=forms.CharField(max_length=100,initial='Smith')  #last初始值
+	middle=forms.CharField(max_length=100)
+	
+def process_form(request):
+	if request.method == 'POST':
+		form=PersonForm(initial={'first':'John'})  #覆盖掉原来的first值
+		return XXX
+		
+异步任务神器:celery
+实现异步任务的工具有很多，其原理都是使用一个任务队列，比如redis的生产者消费者模型或者发布订阅模式实现一个简单的消息队列
+celery由broker和backend组成
+broker:一个消息传输的中间件,推荐使用redis和rabbitmq
+backend:用于存储celery执行的一些消息和结果,可以使用redis和数据库
+
+如果要使用rabbitmq,先启动/usr/sbin/rabbitmq-server -detached
+tasks.py:
+from celery import Celery
+
+broker = 'redis://127.0.0.1:6379/5'
+backend = 'redis://127.0.0.1:6379/6'
+
+
+app = Celery('tasks', broker=broker, backend=backend)
+
+@app.task
+def add(x, y):
+    return x + y
+
+启动celery服务,最好不要使用root:celery -A tasks worker  --loglevel=info
+进入python环境:
+In [0]:from tasks import add
+In [1]: r = add.delay(2, 2)
+In [2]: add.delay(2, 2)
+Out[2]: <AsyncResult: 6fdb0629-4beb-4eb7-be47-f22be1395e1d>
+
+In [3]: r = add.delay(3, 3)
+
+In [4]: r.re
+r.ready   r.result  r.revoke
+
+In [4]: r.ready()
+Out[4]: True
+
+In [6]: r.result
+Out[6]: 6
+
+In [7]: r.get()
+Out[7]: 6
+在celery命令行可以看见celery执行的日志
+
+-----------------------------------------------------------
+计划任务:
+proj  tree
+.
+├── __init__.py
+├── celery.py             # 创建 celery 实例
+├── config.py             # 配置文件
+└── tasks.py              # 任务函数
+
+celery.py:
+
+from __future__ import absolute_import
+from celery import Celery
+
+app = Celery('proj', include=['proj.tasks'])
+
+app.config_from_object('proj.config')
+
+if __name__ == '__main__':
+    app.start()
+	
+这一次创建 app，并没有直接指定 broker 和 backend。而是在配置文件中config.py
+config.py:
+
+from __future__ import absolute_import
+
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/5'
+BROKER_URL = 'redis://127.0.0.1:6379/6'	
+
+tasks.py:
+
+from __future__ import absolute_import
+from proj.celery import app
+
+@app.task
+def add(x, y):
+    return x + y
+	
+在proj同级目录下执行:
+celery -A proj worker -l info
+-------------------------------------------------------------------
+Scheduler:
+每隔一段时间执行一个任务:
+只需要修改config.py:
+config.py:
+
+from __future__ import absolute_import
+
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/5'
+BROKER_URL = 'redis://127.0.0.1:6379/6'
+
+CELERY_TIMEZONE = 'Asia/Shanghai'
+
+from datetime import timedelta
+
+CELERYBEAT_SCHEDULE = {
+    'add-every-30-seconds': {
+         'task': 'proj.tasks.add',
+         'schedule': timedelta(seconds=30),
+         'args': (16, 16)
+    },
+}
+#每隔30s执行一次add函数
+
+一旦使用了 scheduler, 启动 celery需要加上-B 参数
+celery -A proj worker -B -l info
+-------------------------------------------------------------------
+crontab:
+config.py:
+
+from __future__ import absolute_import
+
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/5'
+BROKER_URL = 'redis://127.0.0.1:6379/6'
+
+CELERY_TIMEZONE = 'Asia/Shanghai'
+
+from celery.schedules import crontab
+
+CELERYBEAT_SCHEDULE = {
+    # Executes every Monday morning at 7:30 A.M
+    'add-every-monday-morning': {
+        'task': 'proj.tasks.add',
+        'schedule': crontab(hour=7, minute=30, day_of_week=1),
+        'args': (16, 16),
+    },
+}
+#每周一上午7点30分执行一次add函数
+启动:
+celery -A proj worker -B -l info
+---------------------------------------------------------------------
+
+

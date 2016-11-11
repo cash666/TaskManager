@@ -1,0 +1,168 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
+        <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+	<style>
+		a:hover {
+                        cursor:pointer;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<div>
+	  <div><span style='font-weight:bold'>任务分类:</span> <a href="/task/participated_task?search=all&p_id={{p_id}}">全部</a> <a href="/task/participated_task?search=lauched_from_me&p_id={{p_id}}">由我发起</a> <a href="/task/participated_task?search=assign_to_me&p_id={{p_id}}">指派给我</a> <a href="/task/participated_task?search=transfer_by_me&p_id={{p_id}}">由我转接</a> <a href="/task/participated_task?search=cc_to_me&p_id={{p_id}}">抄送给我</a></div>
+	  <div><span style='font-weight:bold'>创建时间:</span> <a href="/task/participated_task?search=all&&p_id={{p_id}}">全部</a> <a href="/task/participated_task?search=this_week&p_id={{p_id}}">本周</a> <a href="/task/participated_task?search=last_week&p_id={{p_id}}">上周</a> <a href="/task/participated_task?search=this_month&p_id={{p_id}}">本月</a> <a href="/task/participated_task?search=last_month&p_id={{p_id}}">上月</a> <span><select onchange='filter_status(this)'><option>状态</option><option>待接受</option><option>解决中</option><option>已解决</option><option>已关闭</option></select></span></div>
+	  <div style='margin-top:10px'><form action='/task/participated_task/' method='post'>{% csrf_token %}{{searchTaskForm.start_time}} 至 {{searchTaskForm.end_time}} {{ searchTaskForm.search_text }} <input type='hidden' name='p_id' value="{{p_id}}" /> <input type='submit' value='搜索' name='sub' /></form></div>
+	</div>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped" border='1'>
+		  <thead>
+      		    <tr>
+		      <th>任务序号</th>
+		      <th>任务编号</th>
+                      <th>标题</th>
+                      <th>创建人</th>
+                      <th>指派人</th>
+                      <th>创建时间</th>
+                      <th>到期时间</th>
+                      <th>状态</th>
+                      <th>优先级</th>
+                      <th>类型</th>
+                      <th>操作</th>
+      		    </tr>
+                 </thead>
+                 <tbody>
+		  {% if task_list_obj %}
+                     {% for item in task_list_obj %}
+                       <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }} {% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a onclick="show_task(this)">查看</a></td></tr>
+                     {% endfor %}
+                   {% endif %}
+
+		  {% if this_week_obj %}
+                       {% for item in this_week_obj %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+                    
+                    {% if this_month_obj %}
+                       {% for item in this_month_obj %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+                    {% if last_month_obj %}
+                       {% for item in last_month_obj %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if lauched_from_me_obj %}
+                       {% for item in lauched_from_me_obj %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+		  
+		  {% if assign_to_me_obj %}
+                       {% for item in assign_to_me_obj %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		  {% if cc_to_me_obj %}
+                       {% for item in cc_to_me_obj %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		  {% if transfer_by_me_obj %}
+                       {% for item in transfer_by_me_obj %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_transfer}}</td><td>{{item.task_handle_id.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.task_handle_id.end_time|date:"Y-m-d H:i:s"}}</td><td>{{ item.task_status }}</td><td>{{item.task_handle_id.task_priority}}</td><td>{{item.task_handle_id.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if search_task_obj %}
+                       {% for item in search_task_obj %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+                    {% if search_task_obj2 %}
+                       {% for item in search_task_obj2 %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+                    {% if search_task_obj3 %}
+                       {% for item in search_task_obj3 %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+                    {% if search_task_obj4 %}
+                       {% for item in search_task_obj4 %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_title}}</td><td>{{item.task_promoter}}</td><td>{{item.task_assign}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.end_time|date:"Y-m-d H:i:s"}}</td><td>{% for item2 in item.taskshandle_set.all %} {{ item2.task_status }}{% endfor %}</td><td>{{item.task_priority}}</td><td>{{item.task_type}}</td><td><a href='/task/create_task/?t_id={{item.task_id}}'>编辑</a> <a onclick="show_task(this)">查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %} 
+                 </tbody>
+               </table>
+	       <div style="float:right">{{pager_str}}</div>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-1.8.17.custom.min.js"></script>
+        <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-addon.js"></script>
+        <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-zh-CN.js"></script>
+	<script>
+		$("#id_start_time").addClass('ui_timepicker');
+                $("#id_end_time").addClass('ui_timepicker');
+                $(".ui_timepicker").datepicker({
+                        showOn: "button",
+                        buttonImage: "/static/plugins/datetimepicker/css/images/icon_calendar.gif",
+                        buttonImageOnly: true,
+                        //timepicker:false,
+                        //showSecond: true,
+                        //timeFormat: 'hh:mm:ss',
+                        //stepHour: 1,
+                        //stepMinute: 1,
+                        //stepSecond: 1
+                });
+
+		function filter_status(obj){
+                        var status_text=$(obj).find(':selected').text();
+                        $.ajax({
+                                url:'/task/participated_task/',
+                                type:'post',
+                                data:{'status_text':status_text,'csrfmiddlewaretoken':'{{ csrf_token }}'},
+                                success:function(data){
+                                        $('table').find('tbody').html(data);
+                                }
+                        })
+                }
+
+		function show_task(obj){
+			task_id=$(obj).parent().siblings().eq(1).text();
+        		task_status=$(obj).parent().siblings().eq(7).text();
+			task_status=$.trim(task_status);
+			task_status2='待接受';
+        		if (task_status == task_status2){
+                		$(obj).attr('href','/task/show_accepting_task/?t_id='+task_id);
+        		} else {
+                		$(obj).attr('href','/task/show_handling_task/?t_id='+task_id);
+        		}
+		}
+		$(function(){
+                        var url=window.location.href;
+			if (url.indexOf('&message')>0){
+                                len=url.length;
+                                position=url.indexOf('&message');
+                                data=url.substring(position+9,len+1);
+                                alert(decodeURIComponent(data));
+                                url=url.substring(0,position);
+                                window.location.href=url;
+                        }
+                })
+	</script>
+{% endblock %}

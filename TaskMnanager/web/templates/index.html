@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!-- saved from url=(0042)http://v3.bootcss.com/examples/dashboard/# -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="http://v3.bootcss.com/favicon.ico">
+
+    <title>TaskManager系统</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    {% block header_css %}
+	<style>
+		#hosts_count,#assets_count,#idcs_count,#groups_count {
+			width:170px;
+			height:150px;
+			border:1px solid #ccc;
+		}	
+	</style>
+    {% endblock %}
+  </head>
+
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/cmdb/index/">TaskManager系统</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+	    {% if request.user.is_authenticated %}
+                <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class='glyphicon glyphicon-user'></span> {{request.user.userinfo.name}} <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                                <li><a class='glyphicon glyphicon-log-out' href="/task/acc_logout/">注销</a></li>
+                        </ul>
+                </li>
+            {% else %}
+                <li><a href='/'>登录</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid" style='margin-top:10px'>
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar" id="menu">
+            <li><a href="/task/index/"><span class='glyphicon glyphicon-dashboard'></span> 控制台</a></li>
+            <li><a href="/task/create_project/"><span class='glyphicon glyphicon-edit'></span> 新建项目</a></li>
+            <li><a href="/task/create_task/"><span class='glyphicon glyphicon-edit'></span> 新建任务</a></li>
+            <li><a href="/task/accepting_task/"><span class='glyphicon glyphicon-th'></span> 待接受任务<span class="badge">{% if accepting_tasks_count %}{{accepting_tasks_count}} {% endif %}</span></a></li>
+            <li><a href="/task/handling_task/"><span class='glyphicon glyphicon-briefcase'></span> 待处理任务<span class="badge">{% if handling_tasks_count %} {{handling_tasks_count}} {% endif %}</span></a></li>
+            <li><a href="/task/launched_task/"><span class='glyphicon glyphicon-th-large'></span> 我发起的任务</a></li>
+            <li><a href="/task/all_task/"><span class='glyphicon glyphicon-tasks'></span> 我的所有任务</a></li>
+            <li><a href="/task/participated_project/"><span class='glyphicon glyphicon-list-alt'></span> 我参与的项目</a></li>
+            <li><a href="/task/delayed_task/"><span class='glyphicon glyphicon-time'></span> 我的延迟</a></li>
+          </ul>
+        </div>
+	{% block content %}
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h3 class="page-header">控制台</h3>
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder" id='hosts_count'>
+	      所有任务
+	      <hr/>
+              <a href='/task/all_task/'><h4>{{tasks_count}}</h4></a>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder" id='assets_count' style='margin-left:20px'>
+              待接受任务
+	      <hr/>
+              <a href='/task/accepting_task/'><h4>{{accepting_tasks_count}}</h4></a>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder" id='idcs_count' style='margin-left:20px'>
+	      待处理任务
+	      <hr/>
+              <a href='/task/handling_task/'><h4>{{handling_tasks_count}}</h4></a>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder" id='groups_count' style='margin-left:20px'>
+	      延迟的任务
+	      <hr/>
+              <a href='/task/delayed_task/'><h4>{{delaying_tasks_count}}</h4></a>
+            </div>
+          </div>
+        </div>
+	{% endblock %}
+      </div>
+    </div>
+
+    <script src="/static/js/jquery-1.10.1.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/docs.js"></script>
+    <script src="/static/js/common.js"></script>
+ </body>

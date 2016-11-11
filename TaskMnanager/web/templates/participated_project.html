@@ -1,0 +1,132 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
+        <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+	<style>
+		a:hover {
+                        cursor:pointer;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<div>
+	  <div><span style='font-weight:bold'>创建时间:</span> <a href="/task/participated_project?search=all">全部</a> <a href="/task/participated_project?search=this_week">本周</a> <a href="/task/participated_project?search=last_week">上周</a> <a href="/task/participated_project?search=this_month">本月</a> <a href="/task/participated_project?search=last_month">上月</a></div>
+	  <div style='margin-top:10px'><form action='/task/participated_project/' method='post'>{% csrf_token %}{{searchTaskForm.start_time}} 至 {{searchTaskForm.end_time}} {{ searchTaskForm.search_text }} <input type='submit' value='搜索' name='sub' /></form></div>
+	</div>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped" border='1'>
+		  <thead>
+      		    <tr>
+		      <th>任务序号</th>
+                      <th>标题</th>
+                      <th>归属分类</th>
+                      <th>创建人</th>
+                      <th>创建时间</th>
+                      <th>状态</th>
+                      <th>优先级</th>
+                      <th>类型</th>
+                      <th>操作</th>
+      		    </tr>
+                 </thead>
+                 <tbody>
+		     {% if result %}
+		       {% for item in result %}
+        	         <tr><td>{{item.id}}</td><td>{{item.project_name}}</td><td>{{item.project_model}}</td><td>{{item.project_promoter}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.project_status}}</td><td>{{item.project_priority}}</td><td>{{item.project_type}}</td><td><a href='/task/participated_task/?p_id={{item.id}}'>查看</a></td></tr>
+		       {% endfor %}
+		     {% endif %}
+
+		    {% if this_week_obj %}
+                       {% for item in this_week_obj %}
+		         <tr><td>{{item.id}}</td><td>{{item.project_name}}</td><td>{{item.project_model}}</td><td>{{item.project_promoter}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.project_status}}</td><td>{{item.project_priority}}</td><td>{{item.project_type}}</td><td><a href='/task/participated_task/?p_id={{item.id}}'>查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+		    
+		    {% if this_month_obj %}
+                       {% for item in this_month_obj %}
+			 <tr><td>{{item.id}}</td><td>{{item.project_name}}</td><td>{{item.project_model}}</td><td>{{item.project_promoter}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.project_status}}</td><td>{{item.project_priority}}</td><td>{{item.project_type}}</td><td><a href='/task/participated_task/?p_id={{item.id}}'>查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if last_month_obj %}
+                       {% for item in last_month_obj %}
+			 <tr><td>{{item.id}}</td><td>{{item.project_name}}</td><td>{{item.project_model}}</td><td>{{item.project_promoter}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.project_status}}</td><td>{{item.project_priority}}</td><td>{{item.project_type}}</td><td><a href='/task/participated_task/?p_id={{item.id}}'>查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if search_project_obj %}
+                       {% for item in search_project_obj %}
+                         <tr><td>{{item.id}}</td><td>{{item.project_name}}</td><td>{{item.project_model}}</td><td>{{item.project_promoter}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.project_status}}</td><td>{{item.project_priority}}</td><td>{{item.project_type}}</td><td><a href='/task/participated_task/?p_id={{item.id}}'>查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if search_project_obj2 %}
+                       {% for item in search_project_obj2 %}
+                         <tr><td>{{item.id}}</td><td>{{item.project_name}}</td><td>{{item.project_model}}</td><td>{{item.project_promoter}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.project_status}}</td><td>{{item.project_priority}}</td><td>{{item.project_type}}</td><td><a href='/task/participated_task/?p_id={{item.id}}'>查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+		    
+		    {% if search_project_obj4 %}
+                       {% for item in search_project_obj3 %}
+                         <tr><td>{{item.id}}</td><td>{{item.project_name}}</td><td>{{item.project_model}}</td><td>{{item.project_promoter}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.project_status}}</td><td>{{item.project_priority}}</td><td>{{item.project_type}}</td><td><a href='/task/participated_task/?p_id={{item.id}}'>查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if search_project_obj4 %}
+                       {% for item in search_project_obj4 %}
+                         <tr><td>{{item.id}}</td><td>{{item.project_name}}</td><td>{{item.project_model}}</td><td>{{item.project_promoter}}</td><td>{{item.create_time|date:"Y-m-d H:i:s"}}</td><td>{{item.project_status}}</td><td>{{item.project_priority}}</td><td>{{item.project_type}}</td><td><a href='/task/participated_task/?p_id={{item.id}}'>查看</a></td></tr>
+                       {% endfor %}
+                    {% endif %}
+                 </tbody>
+               </table>
+	       <div style="float:right">{{pager_str}}</div>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-1.8.17.custom.min.js"></script>
+        <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-addon.js"></script>
+        <script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-zh-CN.js"></script>
+	<script>
+		$("#id_start_time").addClass('ui_timepicker');
+                $("#id_end_time").addClass('ui_timepicker');
+                $(".ui_timepicker").datepicker({
+                        showOn: "button",
+                        buttonImage: "/static/plugins/datetimepicker/css/images/icon_calendar.gif",
+                        buttonImageOnly: true,
+                        //timepicker:false,
+                        //showSecond: true,
+                        //timeFormat: 'hh:mm:ss',
+                        //stepHour: 1,
+                        //stepMinute: 1,
+                        //stepSecond: 1
+                });
+
+		function show_task(obj){
+			task_id=$(obj).parent().siblings().eq(1).text();
+        		task_status=$(obj).parent().siblings().eq(7).text();
+			task_status=$.trim(task_status);
+			task_status2='待接受';
+        		if (task_status == task_status2){
+                		$(obj).attr('href','/task/show_accepting_task/?t_id='+task_id);
+        		} else {
+                		$(obj).attr('href','/task/show_handling_task/?t_id='+task_id);
+        		}
+		}
+		if("{{message}}"){
+			alert("{{message}}");
+		}
+		$(function(){
+                        var url=window.location.href;
+                        if (url.indexOf('?message')>0){
+                                len=url.length;
+                                position=url.indexOf('?message');
+                                data=url.substring(position+9,len+1);
+                                alert(decodeURIComponent(data));
+                                url=url.substring(0,position);
+                                window.location.href=url;
+                        }
+                })
+	</script>
+{% endblock %}

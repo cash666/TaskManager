@@ -1,0 +1,123 @@
+{% extends "index.html" %}
+{% block header_css %}
+	<link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
+        <link type="text/css" href="/static/plugins/datetimepicker/css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+	<style>
+		a:hover {
+                        cursor:pointer;
+                }
+	</style>	
+{% endblock %}
+{% block content %}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<div>
+	  <div><span style='font-weight:bold'>创建时间:</span> <a href="/task/delayed_task?search=all">全部</a> <a href="/task/delayed_task?search=this_week">本周</a> <a href="/task/delayed_task?search=last_week">上周</a> <a href="/task/delayed_task?search=this_month">本月</a> <a href="/task/delayed_task?search=last_month">上月</a><div style='margin-top:10px'><form action='/task/delayed_task/' method='post'>{% csrf_token %}{{searchTaskForm.start_time}} 至 {{searchTaskForm.end_time}} {{ searchTaskForm.search_text }} <input type='submit' value='搜索' name='sub' /></form></div></div>
+	</div>
+	<div class="table-responsive" style='margin-top:10px'>
+		<table class="table table-striped" border='1'>
+		  <thead>
+      		    <tr>
+		      <th>任务序号</th>
+		      <th>任务编号</th>
+                      <th>任务标题</th>
+                      <th>所属项目</th>
+                      <th>创建人</th>
+                      <th>指派人</th>
+                      <th>开始时间</th>
+                      <th>完成时间</th>
+                      <th>实际完成时间</th>
+                      <th>备注</th>
+      		    </tr>
+                 </thead>
+                 <tbody>
+		     {% if result %}
+      		       {% for item in result %}
+        	         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+		     {% endif %}
+
+		    {% if this_week_result %}
+                       {% for item in this_week_result %}
+		         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}}{% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+                    {% endif %}
+		    
+		    {% if last_week_result %}
+                       {% for item in last_week_result %}
+		         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}}{% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if this_month_result %}
+                       {% for item in this_month_result %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}}{% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if last_month_result %}
+                       {% for item in last_month_result %}
+		         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}}{% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+                    {% endif %}
+			
+		    {% if range_time_result %}
+                       {% for item in range_time_result %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}}{% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if start_time_result %}
+                       {% for item in start_time_result %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}}{% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if end_time_result %}
+                       {% for item in end_time_result %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}}{% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+                    {% endif %}
+
+		    {% if search_text_result %}
+                       {% for item in search_text_result %}
+                         <tr><td>{{forloop.counter}}</td><td>{{item.task_id}}</td><td>{{item.task_handle_id.task_title}}</td><td>{{item.task_handle_id.task_name.project_name}}</td><td>{{item.task_handle_id.task_promoter}}</td><td>{{item.task_assign}}</td><td>{% if item.delay_start_time %}{{item.delay_start_time|date:"Y-m-d H:i:s"}}{% else %} {{ item.start_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{% if item.delay_end_time %} {{item.delay_end_time|date:"Y-m-d H:i:s"}} {% else %} {{ item.end_time|date:"Y-m-d H:i:s" }} {% endif %}</td><td>{{ item.finish_time | date:"Y-m-d H:i:s" }}</td><td>{{ item.task_remark }}</td></tr>
+                       {% endfor %}
+                    {% endif %}
+                 </tbody>
+               </table>
+	       <div style="float:right">{{pager_str}}</div>
+	</div>
+</div>
+{% endblock %}
+{% block bottom_js %}
+	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-1.7.1.min.js"></script>
+  	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-1.8.17.custom.min.js"></script>
+  	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-addon.js"></script>
+  	<script type="text/javascript" src="/static/plugins/datetimepicker/js/jquery-ui-timepicker-zh-CN.js"></script>
+	<script>
+		$("#id_start_time").addClass('ui_timepicker');
+        	$("#id_end_time").addClass('ui_timepicker');
+        	$(".ui_timepicker").datepicker({
+                	showOn: "button",
+                	buttonImage: "/static/plugins/datetimepicker/css/images/icon_calendar.gif",
+                	buttonImageOnly: true,
+			//timepicker:false,
+                	//showSecond: true,
+                	//timeFormat: 'hh:mm:ss',
+                	//stepHour: 1,
+                	//stepMinute: 1,
+                	//stepSecond: 1
+        	});
+		$(function(){
+                	var url=window.location.href;
+                	if (url.indexOf('?message')>0){
+                        	len=url.length;
+                        	position=url.indexOf('?message');
+                        	data=url.substring(position+9,len+1);
+                        	alert(decodeURIComponent(data));
+                        	url=url.substring(0,position);
+                        	window.location.href=url;
+                	}
+        	})
+	</script>
+{% endblock %}

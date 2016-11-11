@@ -1,0 +1,16 @@
+1,打开mysql查询日志来查看哪些IP来连mysql
+show variables like '%general%';
+set global general_log=1;
+然后过滤Connect字段就可以看到
+
+2，uniq -c 在输出行前面加上每行在输入文件中出现的次数。
+        -d 仅显示重复行。
+        -u 仅显示不重复的行。
+
+3,mysqladmin -uroot -pqggahjtg status   查看当前的连接数，看Threads
+或者通过show status like 'Threads%';查看
+mysqladmin -uroot -pqggahjtg processlist
+show variables like '%max_connections%'; 查看数据库当前设置的最大连接数
+
+4,根域名2345.com申请的证书，只有二级域名能使用https，三级，四级不能使用，如果要调用https的接口，对方也必须是https
+IE6,IE7不支持https
