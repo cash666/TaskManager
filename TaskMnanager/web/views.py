@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #coding:utf8
+#author:cash
 
 from django.shortcuts import render,HttpResponse,redirect
 from django.utils.safestring import mark_safe
@@ -54,17 +55,15 @@ def acc_logout(request):
 
 @check_login()
 def index(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
 	handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	tasks_count=models.Tasks.objects.filter(Q(task_promoter=request.user.userinfo.name)|Q(task_assign=request.user.userinfo.name)|Q(task_cc__icontains=request.user.userinfo.name)).select_related().count()
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).select_related().count()
-	handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).select_related().count()
 	delaying_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_reject=1).select_related().count()
 	return render(request,'index.html',{'accepting_tasks_count':accepting_tasks_count,'':handling_tasks_count,'tasks_count':tasks_count,'accepting_tasks_count':accepting_tasks_count,'handling_tasks_count':handling_tasks_count,'delaying_tasks_count':delaying_tasks_count})
 
 @check_login()
 def create_project(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
 	handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	CreateProjectForm=create_project_form.CreateProjectForm()
 	message=request.GET.get('message','')
@@ -99,7 +98,7 @@ def create_project(request):
 
 @check_login()
 def create_task(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
 	handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	CreateTaskForm=create_task_form.CreateTaskForm()
 	title=u"新建任务"
@@ -233,9 +232,9 @@ def create_template(request):
 
 @check_login()
 def accepting_task(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
 	handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
-	accepting_task_obj=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)
+	accepting_task_obj=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0))
 	if accepting_task_obj:
 		for item in accepting_task_obj:
 			task_obj=models.Tasks.objects.filter(task_id=item.task_id)
@@ -253,11 +252,11 @@ def accepting_task(request):
 
 @check_login()
 def show_accepting_task(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
 	handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	task_id=request.GET.get('t_id','')
 	HandleTaskForm=task_handle_form.HandleTaskForm()
-	show_accepting_task_obj=models.TasksHandle.objects.filter(Q(task_assign=request.user.userinfo.name) | Q(task_cc__icontains=request.user.userinfo.name) | Q(task_promoter=request.user.userinfo.name) | Q(task_transfer=request.user.userinfo.name),task_id=task_id,task_status=u'待接受')
+	show_accepting_task_obj=models.TasksHandle.objects.filter(Q(task_assign=request.user.userinfo.name) | Q(task_cc__icontains=request.user.userinfo.name) | Q(task_promoter=request.user.userinfo.name) | Q(task_transfer=request.user.userinfo.name),Q(task_status=u'待接受')|Q(task_status=u'已转接'),task_id=task_id)
 	html=""
 	if task_id:
 		is_ok=models.TaskTalk.objects.filter(task_id=task_id)
@@ -289,8 +288,12 @@ def show_accepting_task(request):
 		task_attachment=task_obj.task_attachment
 		hour="%.2f" % (float(time_delta)/3600)
 	create_task_history_obj=models.Tasks.objects.get(task_id=task_id)
-	#handle_task_history_obj=models.TasksHandle.objects.get(task_id=task_id)
-	return render(request,'show_accepting_task.html',{'show_accepting_task_obj':show_accepting_task_obj,'hour':hour,'task_priority':task_priority,'task_type':task_type,'task_promoter':task_promoter,'task_assign':task_assign,'task_cc':task_cc,'task_attachment':task_attachment,'start_time':start_time,'end_time':end_time,'task_title':task_title,'task_description':task_description,'HandleTaskForm':HandleTaskForm,'create_task_history_obj':create_task_history_obj,'accepting_tasks_count':accepting_tasks_count,'task_id':task_id,'handling_tasks_count':handling_tasks_count,'html':mark_safe(html)})
+	is_exists=models.TasksHandle.objects.filter(task_id=task_id)
+	if not is_exists:
+		return render(request,'show_accepting_task.html',{'show_accepting_task_obj':show_accepting_task_obj,'hour':hour,'task_priority':task_priority,'task_type':task_type,'task_promoter':task_promoter,'task_assign':task_assign,'task_cc':task_cc,'task_attachment':task_attachment,'start_time':start_time,'end_time':end_time,'task_title':task_title,'task_description':task_description,'HandleTaskForm':HandleTaskForm,'create_task_history_obj':create_task_history_obj,'accepting_tasks_count':accepting_tasks_count,'task_id':task_id,'handling_tasks_count':handling_tasks_count,'html':mark_safe(html)})
+	else:
+		handle_task_history_obj=models.TasksHandle.objects.get(task_id=task_id)
+		return render(request,'show_accepting_task.html',{'show_accepting_task_obj':show_accepting_task_obj,'hour':hour,'task_priority':task_priority,'task_type':task_type,'task_promoter':task_promoter,'task_assign':task_assign,'task_cc':task_cc,'task_attachment':task_attachment,'start_time':start_time,'end_time':end_time,'task_title':task_title,'task_description':task_description,'HandleTaskForm':HandleTaskForm,'create_task_history_obj':create_task_history_obj,'handle_task_history_obj':handle_task_history_obj,'accepting_tasks_count':accepting_tasks_count,'task_id':task_id,'handling_tasks_count':handling_tasks_count,'html':mark_safe(html)})
 
 def download(request):
 	'''
@@ -402,7 +405,7 @@ def handle_task(request):
 @check_login()
 def handling_task(request):
 	handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
         handling_task_obj=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0)
         if handling_task_obj:
                 for item in handling_task_obj:
@@ -421,7 +424,7 @@ def handling_task(request):
 
 @check_login()
 def show_handling_task(request):
-        accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
         handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
         task_id=request.GET.get('t_id','')
 	is_finished=request.GET.get('is_finished','')
@@ -534,10 +537,9 @@ def handle_accepting_task(request):
 						is_ok=models.TasksHandle.objects.filter(task_id=task_id).update(task_history=task_history,task_status=u'已转接',is_transfer=1,task_transfer=data['task_assign'],task_cc2=data['task_cc'],task_attachment=data['task_attachment'])
 					if is_ok:
 						return redirect('/task/show_handling_task/?t_id=%s' % task_id)
-
 @check_login()
 def list_all_task(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
         handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	all_task_list=models.Tasks.objects.filter(Q(task_promoter=request.user.userinfo.name)|Q(task_assign=request.user.userinfo.name)|Q(task_cc__icontains=request.user.userinfo.name))
 	searchTaskForm=search_task_form.SearchTaskForm()
@@ -601,7 +603,7 @@ def list_all_task(request):
         	return render(request,'all_task.html',{'all_task_list':all_task_list,'accepting_tasks_count':accepting_tasks_count,'handling_tasks_count':handling_tasks_count,'searchTaskForm':searchTaskForm})
 
 def search_tasks(request,search_time,p_id=None):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
         handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	searchTaskForm=search_task_form.SearchTaskForm()
         if search_time == 'all':
@@ -699,7 +701,7 @@ def search_tasks(request,search_time,p_id=None):
 		
 @check_login()
 def list_participated_task(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
         handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	searchTaskForm=search_task_form.SearchTaskForm()
 	p_id=request.GET.get('p_id','')
@@ -749,7 +751,7 @@ def list_participated_task(request):
 
 @check_login()
 def list_launched_task(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
         handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	search_time=request.GET.get('search','')
 	searchTaskForm=search_task_form.SearchTaskForm()
@@ -858,7 +860,7 @@ def list_participated_project(request):
 	'''
 	列举出所有参与的项目，并列出该项目下对应的任务
 	'''
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
         handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	search_time=request.GET.get('search','')
 	result=[]
@@ -946,11 +948,11 @@ def list_participated_project(request):
 	                last_month_obj=models.Projects.objects.filter(Q(create_time__gte=start)&Q(create_time__lte=end))
 	                return render(request,'participated_project.html',{'accepting_tasks_count':accepting_tasks_count,'handling_tasks_count':handling_tasks_count,'last_month_obj':last_month_obj,'searchTaskForm':searchTaskForm})
 	else:
-		return render(request,'participated_project.html',{'result':result,'searchTaskForm':searchTaskForm,accepting_tasks_count:'accepting_tasks_count','handling_tasks_count':handling_tasks_count})
+		return render(request,'participated_project.html',{'result':result,'searchTaskForm':searchTaskForm,'accepting_tasks_count':accepting_tasks_count,'handling_tasks_count':handling_tasks_count})
 
 @check_login()
 def list_delayed_task(request):
-	accepting_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0).count()
+	accepting_tasks_count=models.TasksHandle.objects.filter(Q(task_transfer=request.user.userinfo.name,is_finish=0)|Q(task_assign=request.user.userinfo.name,is_accept=0,is_reject=0,is_transfer=0)).count()
         handling_tasks_count=models.TasksHandle.objects.filter(task_assign=request.user.userinfo.name,is_accept=1,is_finish=0,is_transfer=0).count()
 	finish_tasks_obj=models.TasksHandle.objects.filter(Q(task_assign=request.user.userinfo.name) & Q(is_finish='1'))
 	result=[]
